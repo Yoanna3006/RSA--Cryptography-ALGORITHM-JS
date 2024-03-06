@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      background-color: rgb(154, 240, 212);
+      color: black;
+      text-align: center;
+      font-size: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1> Cryptography</h1>
+  <h2>RSA ALGORITHM</h2>
+  <script>
+    // Функция за генериране на ключове за RSA
+    function generateRSAKeys() {
+      const p = 61; // Просто число
+      const q = 67; // Просто число
+      const n = p * q; // Произведение на простите числа
+      const totient = (p - 1) * (q - 1); // Функция на Ойлер
+
+      // Избиране на публичен ключ e, който е взаимно прост с totient
+      let e = 2;
+      while (e < totient) {
+        if (gcd(e, totient) === 1) {
+          break;
+        }
+        e++;
+      }
+
+      // Изчисляване на частния ключ d
+      const d = modInverse(e, totient);
+
+      return { publicKey: { n, e }, privateKey: { n, d } };
+    }
+
+    // Функция за криптиране на текст
+    function encryptRSA(text, publicKey) {
+      const encryptedText = [];
+      for (let i = 0; i < text.length; i++) {
+        const char = text.charCodeAt(i);
+        const encryptedChar = modPow(char, publicKey.e, publicKey.n);
+        encryptedText.push(encryptedChar);
+      }
+      return encryptedText;
+    }
+
+    // Функция за декриптиране на текст
+    function decryptRSA(encryptedText, privateKey) {
+      const decryptedText = [];
+      for (let i = 0; i < encryptedText.length; i++) {
+        const encryptedChar = encryptedText[i];
+        const decryptedChar = modPow(encryptedChar, privateKey.d, privateKey.n);
+        decryptedText.push(String.fromCharCode(decryptedChar));
+      }
+      return decryptedText.join("");
+    }
+
+    // Функция за намиране на най-голям общ делител (gcd)
+    function gcd(a, b) {
+      return b === 0 ? a : gcd(b, a % b);
+    }
+
+    // Функция за намиране на обратен по модул числен корен (modular inverse)
+    function modInverse(a, m) {
+      for (let x = 1; x < m; x++) {
+        if ((a * x) % m === 1) {
+          return x;
+        }
+      }
+      return 1;
+    }
+
+    // Функция за изчисляване на (a^b) % m
+    function modPow(a, b, m) {
+      let result = 1;
+      a = a % m;
+      while (b > 0) {
+        if (b % 2 === 1) {
+          result = (result * a) % m;
+        }
+        b = Math.floor(b / 2);
+        a = (a * a) % m;
+      }
+      return result;
+    }
+
+    // Въвеждане на операция (криптиране или декриптиране)
+    const operation = prompt("Изберете операция: 'encrypt' или 'decrypt'").toLowerCase();
+
+    // Генериране на ключове
+    const keys = generateRSAKeys();
+
+    // Въвеждане на текст
+    const text = prompt("Въведете текст:").toUpperCase();
+
+    if (operation === 'encrypt') {
+      // Криптиране и извеждане на резултата
+      const encryptedText = encryptRSA(text, keys.publicKey);
+      alert(`Криптиран текст: ${encryptedText.join(" ")}`);
+    } else if (operation === 'decrypt') {
+      // Декриптиране и извеждане на резултата
+      const decryptedText = decryptRSA(text.split(" ").map(Number), keys.privateKey);
+      alert(`Декриптиран текст: ${decryptedText}`);
+    } else {
+      alert("Невалидна операция. Моля, изберете 'encrypt' или 'decrypt'.");
+    }
+
+
+  </script>
+</body>
+
+</html>
